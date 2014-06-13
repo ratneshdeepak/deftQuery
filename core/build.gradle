@@ -1,0 +1,72 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'artifactory'
+
+group = 'org.deftquery'
+version = "0.1.${new Date().format('yyyyMMddHHmm')}"
+
+description = """Data & Request aware api framework - Core"""
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+buildscript {
+        configurations.classpath.resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+
+        repositories {
+                maven {
+                        url = artifactoryRepoUrl
+                        credentials {
+                                username = artifactoryReaderUsername
+                                password = artifactoryReaderPassword
+                        }
+                }
+        }
+
+        dependencies {
+                classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.0.10'
+        }
+}
+
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+                classifier = 'sources'
+                from sourceSets.main.allSource
+}
+
+artifacts {
+                archives sourcesJar
+}
+
+artifactory {
+                publish {
+			contextUrl = artifactoryContextUrl
+                        repository {
+                                repoKey  = artifactoryReleaseRepoKey
+                                username = artifactoryPublishUsername
+                                password = artifactoryPublishPassword
+                        }
+                }
+}
+
+
+repositories {
+    
+     mavenRepo url: "http://download.java.net/maven/2"
+     mavenRepo url: "http://repo.maven.apache.org/maven2"
+}
+
+dependencies {
+
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.6.4'
+    compile group: 'log4j', name: 'log4j', version:'1.2.16'
+    compile 'joda-time:joda-time:2.3'
+    compile 'javax.persistence:persistence-api:1.0.2'	
+
+    testCompile 'junit:junit:4.8.2'	
+
+}
+
